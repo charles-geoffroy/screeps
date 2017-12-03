@@ -19,6 +19,7 @@ module.exports.loop = function () {
     
     
     var mainSpawn = Game.spawns['Master'];
+    var room = mainSpawn.room;
     
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
@@ -76,5 +77,21 @@ module.exports.loop = function () {
         if(creep.memory.role == 'builder') {
             roleBuilder.run(creep);
         }
+    }
+
+    if (!mainSpawn.memory.nextExtensionPos) {
+        mainSpawn.memory.nextExtensionPos = mainSpawn.pos;
+        mainSpawn.memory.nextExtensionPos.x -= 1;
+    }    
+
+    var extensionLimit = [0,0,5,10,20,30,40,50,60];
+    var extensionCount = room.find(STRUCTURE_EXTENSION).length;
+
+    if (extensionCount < extensionLimit[room.controller.level]) {
+
+        var result = room.createConstructionSite(mainSpawn.memory.nextExtensionPos, STRUCTURE_EXTENSION);
+
+        mainSpawn.memory.nextExtensionPos.x -= Math.floor((Math.random() * 2) + 1) - 1;
+        mainSpawn.memory.nextExtensionPos.y -= Math.floor((Math.random() * 2) + 1) - 1;
     }
 }
