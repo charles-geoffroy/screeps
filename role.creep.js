@@ -20,9 +20,21 @@ module.exports.findSource = function(creep, room) {
         return roomSources[0].id
     }
 
-    var randomSource = roomSources[Math.floor((Math.random() * roomSources.length) + 1) - 1];
+    var assignedSource = null;
+    var assignedSourceCreepCount = 0;
+    var otherCreeps = _.filter(Game.creeps, (c) => c.memory.role == creep.memory.role);
+    var self = this;
 
-    return randomSource.id;
+    roomSources.forEach(function(source) {
+        var sourceCreepCount = _.filter(otherCreeps, (c) => self.getSourceId(c) == source.id).length;
+
+        if (assignedSource == null || sourceCreepCount < assignedSourceCreepCount) {
+            assignedSource = source;
+            assignedSourceCreepCount = sourceCreepCount;
+        }
+    });
+
+    return assignedSource.id;
 }
 
 module.exports.assignSource = function(creep, room) {
