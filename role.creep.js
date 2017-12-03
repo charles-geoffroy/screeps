@@ -30,3 +30,7 @@ module.exports.assignSource = function(creep, room) {
         creep.memory.sourceId = this.findSource(creep, room);
     }
 }
+
+module.exports.hasReachedCarryCapacity = function(creep) {
+    return creep.carry.energy === creep.carryCapacity;
+}

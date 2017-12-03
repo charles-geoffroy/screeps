@@ -1,30 +1,34 @@
 module.exports.__proto__ = require('role.creep')
 
 module.exports.name = 'harvester';
-module.exports.bodyParts = [WORK,WORK,CARRY,MOVE];
+module.exports.bodyParts = [WORK,WORK,MOVE];
+module.exports.states = {
+    MOVING_TO_SOURCE : 0,
+    HARVEST_ENERGY : 1
+};
 
 module.exports.run = function(creep) {   
 
-    if (creep.carry.energy < creep.carryCapacity) {
-        this.assignSource(creep, creep.room);
+    if (!creep.memory.state) {
+        creep.memory.state = this.states.MOVING_TO_SOURCE;
+    }
 
-        var source = Game.getObjectById(this.getSourceId(creep));
+    this.assignSource(creep, creep.room);    
+    var source = Game.getObjectById(this.getSourceId(creep));
 
-        if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+    if (creep.memory.state === this.states.MOVING_TO_SOURCE) {
+        creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+
+        if (creep.pos.isNearTo(source)) {
+            creep.memory.state = this.states.HARVEST_ENERGY;
         }
-    } else {
-        var targets = creep.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
-                    structure.structureType == STRUCTURE_SPAWN ||
-                    structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
-            }
-        });
-        if(targets.length > 0) {
-            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
-            }
+    }
+
+    if (creep.memory.state === this.states.HARVEST_ENERGY) {
+        creep.harvest(source);
+
+        if (this.hasReachedCarryCapacity(creep)) {
+            creep.drop(RESOURCE_ENERGY);
         }
     }
 }

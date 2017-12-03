@@ -1,18 +1,22 @@
 var roleHarvester = require('role.creep.harvester');
 var roleUpgrader = require('role.creep.upgrader');
+var roleMule = require('role.creep.mule');
 var roleBuilder = require('role.builder');
 
 module.exports.loop = function () {
     
     var roleControl = {};
-    roleControl['harvester'] = 4;
+    roleControl['harvester'] = 2;
+    roleControl['mule'] = 6;
     roleControl['upgrader'] = 6;
     roleControl['builder'] = 2;
     
     var roles = {};
     roles['harvester'] = roleHarvester;
+    roles['mule'] = roleMule;
     roles['upgrader'] = roleUpgrader;
     roles['builder'] = roleBuilder;
+    
     
     var mainSpawn = Game.spawns['Master'];
     
@@ -65,6 +69,9 @@ module.exports.loop = function () {
         }
         if(creep.memory.role == roleUpgrader.name) {
             roleUpgrader.run(creep);
+        }
+        if (creep.memory.role == roleMule.name) {
+            roleMule.run(creep);
         }
         if(creep.memory.role == 'builder') {
             roleBuilder.run(creep);
