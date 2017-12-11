@@ -1,11 +1,11 @@
 module.exports.__proto__ = require('role.creep')
 
-module.exports.name = 'mule';
-module.exports.bodyParts = [CARRY,CARRY,MOVE,MOVE];
+module.exports.name = 'repairer';
+module.exports.bodyParts = [CARRY,CARRY,MOVE,MOVE,WORK];
 module.exports.states = {
     MOVING_TO_SOURCE : 0,
     PICK_UP_ENERGY : 1,
-    TRANSFER_TO_TARGET : 2
+    REPAIRING : 2
 };
 
 module.exports.run = function(creep) {
@@ -42,28 +42,29 @@ module.exports.run = function(creep) {
         }
 
         if (this.hasReachedCarryCapacity(creep)) {
-            creep.memory.state = this.states.TRANSFER_TO_TARGET;
+            creep.memory.state = this.states.REPAIRING;
         }
     }
 
-    if (creep.memory.state === this.states.TRANSFER_TO_TARGET) {
-
+    if (creep.memory.state === this.states.REPAIRING) {
+        
         if (creep.carry.energy == 0) {
             this.clearTarget(creep);
             creep.memory.state = this.states.MOVING_TO_SOURCE;
             return;
         }
 
-        this.assignTarget(creep, creep.room, this.findStructureToTransferEnergy);
+        this.assignTarget(creep, creep.room, this.findStructureToRepair);
 
         if (this.hasTarget(creep)) {
             var target = this.getTarget(creep);
-            
-            if (target.energy < target.energyCapacity) {
-                this.moveToTransfer(creep, target, RESOURCE_ENERGY);
+
+            if (target.hits < target.hitsMax) {
+                this.moveToRepair(creep, target);
             } else {
                 this.clearTarget(creep);
-            }            
+            }
+
         }
     }
 }

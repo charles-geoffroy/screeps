@@ -2,24 +2,27 @@ var roleHarvester = require('role.creep.harvester');
 var roleUpgrader = require('role.creep.upgrader');
 var roleMule = require('role.creep.mule');
 var roleBuilder = require('role.builder');
+var roleRepairer = require('role.creep.repairer');
 
 module.exports.loop = function () {
     
     var roleControl = {};
     roleControl['harvester'] = 2;
-    roleControl['mule'] = 6;
+    roleControl['mule'] = 4;
     roleControl['upgrader'] = 6;
-    roleControl['builder'] = 2;
+    roleControl['builder'] = 4;
+    roleControl['repairer'] = 2;
     
     var roles = {};
     roles['harvester'] = roleHarvester;
     roles['mule'] = roleMule;
     roles['upgrader'] = roleUpgrader;
     roles['builder'] = roleBuilder;
+    roles['builder'] = roleBuilder;
+    roles['repairer'] = roleRepairer;
     
-    
-    var mainSpawn = Game.spawns['Master'];
-    var room = mainSpawn.room;
+    var spawn = Game.spawns['Master'];
+    var room = spawn.room;
     
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
@@ -28,7 +31,7 @@ module.exports.loop = function () {
         }
     }
     
-    if (mainSpawn.spawning == null) {
+    if (spawn.spawning == null) {
         
         for (var roleName in roleControl) {
             
@@ -42,7 +45,7 @@ module.exports.loop = function () {
                var creepName = roleName + Game.time;
                
                
-               if (mainSpawn.spawnCreep(role.bodyParts, creepName, {memory: {role: roleName}}) == OK) {
+               if (spawn.spawnCreep(role.bodyParts, creepName, {memory: {role: roleName}}) == OK) {
                     console.log('Spawning new ' + roleName + ': ' + creepName);
                     
                     break;
@@ -54,12 +57,12 @@ module.exports.loop = function () {
         }
     }
 
-    if(mainSpawn.spawning) {
-        var spawningCreep = Game.creeps[mainSpawn.spawning.name];
-        mainSpawn.room.visual.text(
+    if(spawn.spawning) {
+        var spawningCreep = Game.creeps[spawn.spawning.name];
+        spawn.room.visual.text(
             '🛠️' + spawningCreep.memory.role,
-            mainSpawn.pos.x + 1,
-            mainSpawn.pos.y,
+            spawn.pos.x + 1,
+            spawn.pos.y,
             {align: 'left', opacity: 0.8});
     }
 
@@ -74,24 +77,63 @@ module.exports.loop = function () {
         if (creep.memory.role == roleMule.name) {
             roleMule.run(creep);
         }
-        if(creep.memory.role == 'builder') {
+        if(creep.memory.role == roleBuilder.name) {
             roleBuilder.run(creep);
+        }
+        if(creep.memory.role == roleRepairer.name) {
+            roleRepairer.run(creep);
         }
     }
 
-    if (!mainSpawn.memory.nextExtensionPos) {
-        mainSpawn.memory.nextExtensionPos = mainSpawn.pos;
-        mainSpawn.memory.nextExtensionPos.x -= 1;
+    if (!spawn.memory.nextExtensionPos) {
+        spawn.memory.nextExtensionPos = spawn.pos;
+        spawn.memory.nextExtensionPos.x -= 1;
     }    
+
+    if(!room.memory.roads) {
+
+        var goals = [];
+        goals.push(room.controller.pos);
+
+        var sources = room.find(FIND_SOURCES_ACTIVE);
+        sources.forEach(function(source) {
+            goals.push(source.pos);
+        });
+
+        var result = PathFinder.search(spawn.pos, goals);
+
+        room.memory.roads = {};
+        room.memory.roads.path = result.path;
+        room.memory.roads.nextConstructionPathIdx = 0;   
+    }
+
+    var constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);    
+    var roadConstructionSite = _.filter(constructionSites, (cs) => cs.structureType == STRUCTURE_ROAD);
+
+    if (roadConstructionSite.length == 0) {
+        var roomConstructionSitePos = room.memory.roads.path[room.memory.roads.nextConstructionPathIdx];
+
+        if (room.createConstructionSite(roomConstructionSitePos.x, roomConstructionSitePos.y, STRUCTURE_ROAD) == OK) {
+            console.log('Create new road at (' + roomConstructionSitePos.x + ',' + roomConstructionSitePos.y + ')');
+            room.memory.roads.nextConstructionPathIdx++;
+        }
+    }
+
+    
 
     var extensionLimit = [0,0,5,10,20,30,40,50,60];
     var extensionCount = room.find(STRUCTURE_EXTENSION).length;
 
-    if (extensionCount < extensionLimit[room.controller.level]) {
+    // if (extensionCount < extensionLimit[room.spawn.level]) {
+    //     var result = room.createConstructionSite(
+    //         spawn.memory.nextExtensionPos.x, 
+    //         spawn.memory.nextExtensionPos.y, STRUCTURE_EXTENSION);
 
-        var result = room.createConstructionSite(mainSpawn.memory.nextExtensionPos, STRUCTURE_EXTENSION);
+    //     spawn.memory.nextExtensionPos.x -= Math.floor((Math.random() * 2) + 1) - 1;
+    //     spawn.memory.nextExtensionPos.y -= Math.floor((Math.random() * 2) + 1) - 1;
 
-        mainSpawn.memory.nextExtensionPos.x -= Math.floor((Math.random() * 2) + 1) - 1;
-        mainSpawn.memory.nextExtensionPos.y -= Math.floor((Math.random() * 2) + 1) - 1;
-    }
+    //     if (spawn.memory.nextExtensionPos.x < 0 || spawn.memory.nextExtensionPos.y < 0) {
+    //         spawn.memory.nextExtensionPos = null;
+    //     }
+    // }
 }
