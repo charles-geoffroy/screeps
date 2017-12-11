@@ -60,7 +60,7 @@ module.exports.loop = function () {
     if(spawn.spawning) {
         var spawningCreep = Game.creeps[spawn.spawning.name];
         spawn.room.visual.text(
-            '🛠️' + spawningCreep.memory.role,
+            'ðŸ› ï¸' + spawningCreep.memory.role,
             spawn.pos.x + 1,
             spawn.pos.y,
             {align: 'left', opacity: 0.8});
@@ -91,19 +91,25 @@ module.exports.loop = function () {
     }    
 
     if(!room.memory.roads) {
+        var routePath = [];
+        var spawnToControllerRoute = PathFinder.search(spawn.pos, room.controller.pos);    
+
+        routePath = routePath.concat(spawnToControllerRoute.path);
 
         var goals = [];
         goals.push(room.controller.pos);
 
         var sources = room.find(FIND_SOURCES_ACTIVE);
         sources.forEach(function(source) {
-            goals.push(source.pos);
+            var spawnToSourceRoute = PathFinder.search(spawn.pos, source.pos);
+            routePath = routePath.concat(spawnToSourceRoute.path);
+
+            var controllerToSourceRoute = PathFinder.search(room.controller.pos, source.pos);
+            routePath = routePath.concat(controllerToSourceRoute.path);
         });
 
-        var result = PathFinder.search(spawn.pos, goals);
-
         room.memory.roads = {};
-        room.memory.roads.path = result.path;
+        room.memory.roads.path = routePath;
         room.memory.roads.nextConstructionPathIdx = 0;   
     }
 
@@ -113,7 +119,7 @@ module.exports.loop = function () {
     if (roadConstructionSite.length == 0) {
         var roomConstructionSitePos = room.memory.roads.path[room.memory.roads.nextConstructionPathIdx];
 
-        if (room.createConstructionSite(roomConstructionSitePos.x, roomConstructionSitePos.y, STRUCTURE_ROAD) == OK) {
+        if (roomConstructionSitePos && room.createConstructionSite(roomConstructionSitePos.x, roomConstructionSitePos.y, STRUCTURE_ROAD) == OK) {
             console.log('Create new road at (' + roomConstructionSitePos.x + ',' + roomConstructionSitePos.y + ')');
             room.memory.roads.nextConstructionPathIdx++;
         }
