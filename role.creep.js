@@ -103,7 +103,7 @@ module.exports.findStructureToRepair = function(creep, room) {
 module.exports.findConstructionTarget = function(creep, room) {
     var constructionTargets = room.find(FIND_CONSTRUCTION_SITES);
 
-    return constructionTargets.length > 0 ? constructionTargets[0] : null;
+    return constructionTargets.length > 0 ? constructionTargets[0].id : null;
 }
 
 
@@ -152,6 +152,14 @@ module.exports.moveToBuild = function(creep, target) {
 
 module.exports.moveToPickup = function(creep, target) {
     if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+    }
+}
+
+module.exports.moveToDrop = function(creep, target, range) {
+    if (creep.pos.inRangeTo(target, range)) {
+        creep.drop(RESOURCE_ENERGY);
+    } else {
         creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
     }
 }

@@ -5,7 +5,8 @@ module.exports.bodyParts = [CARRY,CARRY,MOVE,MOVE];
 module.exports.states = {
     MOVING_TO_SOURCE : 0,
     PICK_UP_ENERGY : 1,
-    TRANSFER_TO_TARGET : 2
+    TRANSFER_TO_TARGET : 2,
+    DROP_TO_CONSTRUCTION_SITE : 3
 };
 
 module.exports.run = function(creep) {
@@ -64,6 +65,25 @@ module.exports.run = function(creep) {
             } else {
                 this.clearTarget(creep);
             }            
+        } else {
+            creep.memory.state = this.states.DROP_TO_CONSTRUCTION_SITE;
+        }
+    }
+
+    if (creep.memory.state === this.states.DROP_TO_CONSTRUCTION_SITE) {
+
+        if (creep.carry.energy == 0) {
+            this.clearTarget(creep);
+            creep.memory.state = this.states.MOVING_TO_SOURCE;
+            return;
+        }
+
+        this.assignTarget(creep, creep.room, this.findConstructionTarget);
+
+        if (this.hasTarget(creep)) {
+            var target = this.getTarget(creep);
+
+            this.moveToDrop(creep, target, 1);
         }
     }
 }
