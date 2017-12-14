@@ -119,9 +119,15 @@ module.exports.loop = function () {
     if (roadConstructionSite.length == 0) {
         var roomConstructionSitePos = room.memory.roads.path[room.memory.roads.nextConstructionPathIdx];
 
-        if (roomConstructionSitePos && room.createConstructionSite(roomConstructionSitePos.x, roomConstructionSitePos.y, STRUCTURE_ROAD) == OK) {
-            console.log('Create new road at (' + roomConstructionSitePos.x + ',' + roomConstructionSitePos.y + ')');
-            room.memory.roads.nextConstructionPathIdx++;
+        if (roomConstructionSitePos) {
+            var constructionSiteResult = room.createConstructionSite(roomConstructionSitePos.x, roomConstructionSitePos.y, STRUCTURE_ROAD);
+
+            if (constructionSiteResult == OK) {
+                console.log('Create new road at (' + roomConstructionSitePos.x + ',' + roomConstructionSitePos.y + ')');
+                room.memory.roads.nextConstructionPathIdx++;
+            } else if (constructionSiteResult == ERR_INVALID_TARGET) {
+                room.memory.roads.nextConstructionPathIdx++;
+            }
         }
     }
 

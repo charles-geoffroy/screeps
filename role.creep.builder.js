@@ -11,7 +11,7 @@ module.exports.states = {
 
 module.exports.run = function(creep) {
 
-    this.assignTarget(creep, creep.room, this.findtionTarget);
+    this.assignTarget(creep, creep.room, this.findConstructionTarget);
 
     if (this.hasTarget(creep)) {
         var target = this.getTarget(creep);
@@ -33,15 +33,17 @@ module.exports.run = function(creep) {
         }
 
         var droppedResources = creep.room.lookForAtArea(LOOK_ENERGY,  target.pos.y - 1, target.pos.x - 1, target.pos.y + 1, target.pos.x + 1, true);
+        if (droppedResources.length > 0) {
+            var droppedResourcePos = new RoomPosition(droppedResources[0].x, droppedResources[0].y, creep.room.name);
 
-        if (droppedResources > 0) {
-            creep.moveTo(droppedResources[0].x, droppedResources[0].y);
+            var pickupTargets = creep.room.find(FIND_DROPPED_RESOURCES);
+            pickupTargets =_.filter(pickupTargets, (pt) => pt.pos.x == droppedResourcePos.x && pt.pos.y == droppedResourcePos.y);
 
-            if (creep.pos.x == droppedResources[0].x && creep.pos.y == droppedResources[0].y) {
-                creep.pickup(); // MEH!
+            if (pickupTargets.length > 0) {
+                this.moveToPickup(creep, pickupTargets[0]);
+            } else {
+                creep.memory.state = this.states.BUILDING;
             }
-
-            this.moveToPickup(creep, droppedResources[0]);
         } else {
             creep.memory.state = this.states.BUILDING;
         }     
