@@ -46,11 +46,6 @@ module.exports.assignSource = function(creep, room) {
 }
 
 // TARGET
-
-module.exports.hasTarget = function(creep) {
-    return this.getTargetId(creep) != null;
-}
-
 module.exports.getTargetId = function(creep) {
     if (creep.memory.targetId) {
         return creep.memory.targetId;
@@ -59,17 +54,31 @@ module.exports.getTargetId = function(creep) {
 }
 
 module.exports.getTarget = function(creep) {
-    if (this.hasTarget(creep)) {
-        return Game.getObjectById(this.getTargetId(creep));;
+    var targetId = this.getTargetId(creep);
+    
+    if (targetId != null) {
+        var target = Game.getObjectById(targetId);
+
+        if (!target) {
+            this.clearTarget(creep);
+            return null;
+        }
+
+        return target;
     }
+
     return null;
 }
 
-
 module.exports.assignTarget = function(creep, room, findCallback) {
-    if (!this.hasTarget(creep)) {
+    var target = this.getTarget(creep);
+
+    if (target == null) {
         creep.memory.targetId = findCallback(creep, room);
+        target = this.getTarget(creep);
     }
+
+    return target;
 }
 
 module.exports.clearTarget = function(creep) {

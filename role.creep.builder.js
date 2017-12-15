@@ -1,4 +1,6 @@
-module.exports.__proto__ = require('role.creep')
+var utils = require('utils');
+
+module.exports.__proto__ = require('role.creep');
 
 module.exports.name = 'builder';
 module.exports.bodyParts = [CARRY,MOVE,WORK,WORK];
@@ -9,20 +11,22 @@ module.exports.states = {
     IDLE : 3
 };
 
-module.exports.run = function(creep) {
+module.exports.run = function(creep) {    
 
-    this.assignTarget(creep, creep.room, this.findConstructionTarget);
-
-    if (this.hasTarget(creep)) {
-        var target = this.getTarget(creep);
-
-        if (target.progress == target.progressTotal) {
-            this.clearTarget(creep);
-            creep.memory.state = this.states.IDLE;
-            return;
-        }
-
+    if (!creep.memory.state) {
         creep.memory.state = this.states.PICK_UP_ENERGY;
+    }
+
+    var target = this.getTarget(creep);
+
+    if (target != null && target.progress == target.progressTotal) {
+        this.clearTarget(creep);
+        creep.memory.state = this.states.IDLE;
+    }
+
+    target = this.assignTarget(creep, creep.room, this.findConstructionTarget);
+    if (target == null) {
+        creep.memory.state = this.states.IDLE;
     }
 
     if (creep.memory.state === this.states.PICK_UP_ENERGY) {
@@ -49,11 +53,19 @@ module.exports.run = function(creep) {
         }     
     }
 
-    if (creep.memory.state === this.states.BUILDING) {
+    if (creep.memory.state === this.states.BUILDING) {        
 
         if (this.hasEnergy(creep)) {
-            this.moveToBuild(creep, creep.memory.target);
+            var target = this.getTarget(creep);
+
+            this.moveToBuild(creep, target);
         } else {
+            creep.memory.state = this.states.PICK_UP_ENERGY;
+        }
+    }
+
+    if (creep.memory.state === this.states.IDLE) {
+        if (target != null) {
             creep.memory.state = this.states.PICK_UP_ENERGY;
         }
     }

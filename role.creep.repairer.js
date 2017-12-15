@@ -54,9 +54,9 @@ module.exports.run = function(creep) {
             return;
         }
 
-        this.assignTarget(creep, creep.room, this.findStructureToRepair);
+        var target = this.assignTarget(creep, creep.room, this.findStructureToRepair);
 
-        if (this.hasTarget(creep)) {
+        if (target != null) {
             var target = this.getTarget(creep);
 
             if (target.hits < target.hitsMax) {

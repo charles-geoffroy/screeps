@@ -10,8 +10,8 @@ module.exports.loop = function () {
     roleControl['harvester'] = 2;
     roleControl['mule'] = 4;
     roleControl['upgrader'] = 6;
-    roleControl['builder'] = 4;
-    roleControl['repairer'] = 2;
+    roleControl['builder'] = 3;
+    roleControl['repairer'] = 1;
     
     var roles = {};
     roles['harvester'] = roleHarvester;

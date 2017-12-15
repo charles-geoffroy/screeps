@@ -55,11 +55,9 @@ module.exports.run = function(creep) {
             return;
         }
 
-        this.assignTarget(creep, creep.room, this.findStructureToTransferEnergy);
+        var target = this.assignTarget(creep, creep.room, this.findStructureToTransferEnergy);
 
-        if (this.hasTarget(creep)) {
-            var target = this.getTarget(creep);
-            
+        if (target != null) {            
             if (target.energy < target.energyCapacity) {
                 this.moveToTransfer(creep, target, RESOURCE_ENERGY);
             } else {
@@ -78,9 +76,9 @@ module.exports.run = function(creep) {
             return;
         }
 
-        this.assignTarget(creep, creep.room, this.findConstructionTarget);
+        var target = this.assignTarget(creep, creep.room, this.findConstructionTarget);
 
-        if (this.hasTarget(creep)) {
+        if (target != null) {
             var target = this.getTarget(creep);
 
             this.moveToDrop(creep, target, 1);
