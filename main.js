@@ -3,6 +3,7 @@ var roleUpgrader = require('role.creep.upgrader');
 var roleMule = require('role.creep.mule');
 var roleBuilder = require('role.creep.builder');
 var roleRepairer = require('role.creep.repairer');
+var roleScout = require('role.creep.scout');
 
 module.exports.loop = function () {
     
@@ -12,6 +13,7 @@ module.exports.loop = function () {
     roleControl['upgrader'] = 6;
     roleControl['builder'] = 3;
     roleControl['repairer'] = 1;
+    roleControl['scout'] = 1;
     
     var roles = {};
     roles['harvester'] = roleHarvester;
@@ -20,6 +22,7 @@ module.exports.loop = function () {
     roles['builder'] = roleBuilder;
     roles['builder'] = roleBuilder;
     roles['repairer'] = roleRepairer;
+    roles['scout'] = roleScout;
     
     var spawn = Game.spawns['Master'];
     var room = spawn.room;
@@ -82,6 +85,9 @@ module.exports.loop = function () {
         }
         if(creep.memory.role == roleRepairer.name) {
             roleRepairer.run(creep);
+        }
+        if(creep.memory.role == roleScout.name) {
+            roleScout.run(creep);
         }
     }
 
