@@ -13,7 +13,7 @@ module.exports.loop = function () {
     roleControl['upgrader'] = 6;
     roleControl['builder'] = 3;
     roleControl['repairer'] = 1;
-    roleControl['scout'] = 1;
+    roleControl['scout'] = 4;
     
     var roles = {};
     roles['harvester'] = roleHarvester;
@@ -26,6 +26,10 @@ module.exports.loop = function () {
     
     var spawn = Game.spawns['Master'];
     var room = spawn.room;
+
+    if (!spawn.memory.map) {
+        spawn.memory.map = {};
+    }
     
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
