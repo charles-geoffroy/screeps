@@ -33,22 +33,47 @@ module.exports.run = function(creep) {
     }
 
     if (!creep.memory.destinationRoom || creep.memory.destinationRoom === creep.room.name) {
-
-
         var directions = [TOP, RIGHT, BOTTOM, LEFT];
-        var direction = directions[Math.floor((Math.random() * 4) + 1) - 1];
+        var comingFrom = getOppositeDirection(creep.memory.direction);
+
+        if (comingFrom != null) {
+            directions.splice(directions.indexOf(comingFrom), 1);
+        }
+
+        var newDirection = directions[Math.floor((Math.random() * directions.length) + 1) - 1];
 
         var exits = Game.map.describeExits(creep.room.name);
 
-        while (!exits[direction]) {
-            direction = directions[Math.floor((Math.random() * 4) + 1) - 1];
+        while (!exits[newDirection]) {
+            newDirection = directions[Math.floor((Math.random() * directions.length) + 1) - 1];
         }
 
-        creep.memory.destinationRoom = exits[direction];
+        creep.memory.destinationRoom = exits[newDirection];
+        creep.memory.direction = newDirection;
     }
     
     var target = new RoomPosition(25, 25, creep.memory.destinationRoom);
 
     creep.moveTo(target);
+}
+
+getOppositeDirection = function(direction) {
+    if (direction === TOP) {
+        return BOTTOM;
+    }
+
+    if (direction === BOTTOM) {
+        return TOP;
+    }
+
+    if (direction === RIGHT) {
+        return LEFT;
+    }
+
+    if (direction === LEFT) {
+        return RIGHT;
+    }
+
+    return null;
 }
 
